@@ -107,6 +107,8 @@ var Vue=function(){
   this.powerButtonInitialXPosition=81;
   //Simon Game Container
   this.simonGameContainer;
+  //inner Circle Container
+  this.innerCircleContainer;
   var that=this;
   var buttons=[];
 
@@ -120,45 +122,15 @@ var Vue=function(){
     outerCircle.y=100;
     outerCircle.shadow=new createjs.Shadow("#000000",0, 0, 10);
     this.simonGameContainer.addChild(outerCircle);
-    this.redButton=new createjs.Shape();
-    this.redButton.graphics.f(createjs.Graphics.getRGB(redButtonColor));
-    this.redButton.graphics.setStrokeStyle(20);
-    var strokeCommand = this.redButton.graphics.beginStroke("#333").command;
-    this.redButton.graphics.moveTo(0,0)
-    this.redButton.graphics.arc(0,0,200,0,Math.PI/2);
-    this.redButton.graphics.lineTo(0,0);
-    this.redButton.x=100;
-    this.redButton.y=100;
+    this.redButton=drawSoundButton(redButtonColor,"top right");
     this.simonGameContainer.addChild(this.redButton);
-    this.greenButton=new createjs.Shape();
-    this.greenButton.graphics.f(createjs.Graphics.getRGB(greenButtonColor));
-    this.greenButton.graphics.setStrokeStyle(20);
-    var strokeCommand1 = this.greenButton.graphics.beginStroke("#333").command;
-    this.greenButton.graphics.moveTo(0,0)
-    this.greenButton.graphics.arc(0,0,200,Math.PI/2,Math.PI);
-    this.greenButton.graphics.lineTo(0,0);
-    this.greenButton.x=100;
-    this.greenButton.y=100;
-    this.simonGameContainer.addChild(this.greenButton);
-    this.blueButton=new createjs.Shape();
-    this.blueButton.graphics.f(createjs.Graphics.getRGB(blueButtonColor));
-    this.blueButton.graphics.setStrokeStyle(20);
-    var strokeCommand2 = this.blueButton.graphics.beginStroke("#333").command;
-    this.blueButton.graphics.moveTo(0,0)
-    this.blueButton.graphics.arc(0,0,200,Math.PI,-Math.PI/2);
-    this.blueButton.x=100;
-    this.blueButton.y=100;
+    this.blueButton=drawSoundButton(blueButtonColor,"top left");
     this.simonGameContainer.addChild(this.blueButton);
-    this.yellowButton=new createjs.Shape();
-    this.yellowButton.graphics.f(createjs.Graphics.getRGB(yellowButtonColor));
-    this.yellowButton.graphics.setStrokeStyle(20);
-    var strokeCommand3 = this.yellowButton.graphics.beginStroke("#333").command;
-    this.yellowButton.graphics.moveTo(0,0)
-    this.yellowButton.graphics.arc(0,0,200,-Math.PI/2,0);
-    this.yellowButton.graphics.lineTo(0,0);
-    this.yellowButton.x=100;
-    this.yellowButton.y=100;
+    this.greenButton=drawSoundButton(greenButtonColor,"bottom left");
+    this.simonGameContainer.addChild(this.greenButton);
+    this.yellowButton=drawSoundButton(yellowButtonColor,"bottom right");
     this.simonGameContainer.addChild(this.yellowButton);
+    this.innerCircleContainer=new createjs.Container();
     var innerCircle=new createjs.Shape();
     innerCircle.graphics.f(createjs.Graphics.getRGB(0x444444));
     innerCircle.graphics.setStrokeStyle(10);
@@ -166,7 +138,7 @@ var Vue=function(){
     innerCircle.graphics.arc(0,0,100,0,2*Math.PI);
     innerCircle.x=100;
     innerCircle.y=100;
-    this.simonGameContainer.addChild(innerCircle);
+    this.innerCircleContainer.addChild(innerCircle);
     var screen=new createjs.Shape();
     screen.graphics.f(createjs.Graphics.getRGB(0x330000));
     screen.graphics.setStrokeStyle(3);
@@ -175,11 +147,11 @@ var Vue=function(){
     screen.graphics.drawRoundRect(0,0,50,30,3);
     screen.x=20;
     screen.y=90;
-    this.simonGameContainer.addChild(screen);
+    this.innerCircleContainer.addChild(screen);
     var screenToShowStepsTitle = new createjs.Text("COUNT", "10px Arial", "#FFF");
     screenToShowStepsTitle.x=25;
     screenToShowStepsTitle.y=125;
-    this.simonGameContainer.addChild(screenToShowStepsTitle);
+    this.innerCircleContainer.addChild(screenToShowStepsTitle);
     this.startButton=new createjs.Shape();
     this.startButton.graphics.f(createjs.Graphics.getRGB(0xFF0000));
     this.startButton.graphics.setStrokeStyle(3);
@@ -187,11 +159,11 @@ var Vue=function(){
     this.startButton.graphics.arc(0,0,12,0,2*Math.PI);
     this.startButton.x=100;
     this.startButton.y=105;
-    this.simonGameContainer.addChild(this.startButton);
+    this.innerCircleContainer.addChild(this.startButton);
     var startButtonText = new createjs.Text("START", "10px Arial", "#FFF");
     startButtonText.x =85;
     startButtonText.y=125;
-    this.simonGameContainer.addChild(startButtonText);
+    this.innerCircleContainer.addChild(startButtonText);
     this.strictButtonLED=drawStrictButtonLED(0x440000);
     this.strictButton=new createjs.Shape();
     this.strictButton.graphics.f(createjs.Graphics.getRGB(0xFFFF00));
@@ -200,41 +172,44 @@ var Vue=function(){
     this.strictButton.graphics.arc(0,0,12,0,2*Math.PI);
     this.strictButton.x=150;
     this.strictButton.y=105;
-    this.simonGameContainer.addChild(this.strictButton);
+    this.innerCircleContainer.addChild(this.strictButton);
     var strictButtonText = new createjs.Text("STRICT", "10px Arial", "#FFF");
     strictButtonText.x =135;
     strictButtonText.y=125;
-    this.simonGameContainer.addChild(strictButtonText);
+    this.innerCircleContainer.addChild(strictButtonText);
     var powerButtonSupport=new createjs.Shape();
     powerButtonSupport.graphics.f(createjs.Graphics.getRGB(0x333333));
     powerButtonSupport.graphics.moveTo(0,0);
     powerButtonSupport.graphics.drawRoundRect(0,0,45,20,2);
     powerButtonSupport.x=80;
     powerButtonSupport.y=150;
-    this.simonGameContainer.addChild(powerButtonSupport);
+    this.innerCircleContainer.addChild(powerButtonSupport);
     this.powerButton=new createjs.Shape();
     this.powerButton.graphics.f(createjs.Graphics.getRGB(0x00AAFF));
     this.powerButton.graphics.moveTo(0,0);
     this.powerButton.graphics.drawRoundRect(0,0,20,18,2);
     this.powerButton.x=81;
     this.powerButton.y=151;
-    this.simonGameContainer.addChild(this.powerButton);
+    this.innerCircleContainer.addChild(this.powerButton);
     var offText = new createjs.Text("OFF", "10px Arial", "#FFF");
     offText.x=60;
     offText.y=155;
-    this.simonGameContainer.addChild(offText);
+    this.innerCircleContainer.addChild(offText);
     var onText = new createjs.Text("ON", "10px Arial", "#FFF");
     onText.x=130;
     onText.y=155;
-    this.simonGameContainer.addChild(onText);
+    this.innerCircleContainer.addChild(onText);
     var gameName = new createjs.Text("Simon Game", "30px 'Anton'", "#FFF");
     gameName.x=29;
     gameName.y=30;
-    this.simonGameContainer.addChild(gameName);
+    this.innerCircleContainer.addChild(gameName);
     this.screenText = new createjs.Text("--", "25px 'Orbitron'", "#F00");
     this.screenText.x=33;
     this.screenText.y=90;
-    this.simonGameContainer.addChild(this.screenText);
+    this.innerCircleContainer.addChild(this.screenText);
+    this.innerCircleContainer.x=0;
+    this.innerCircleContainer.y=0;
+    this.simonGameContainer.addChild(this.innerCircleContainer);
     this.stage.addChild(this.simonGameContainer);
     this.simonGameContainer.x=(canvas.width-200)/2;
     this.simonGameContainer.y=(canvas.height-200)/2;
@@ -246,6 +221,10 @@ var Vue=function(){
     this.startButton.id='start';
     this.strictButton.id='strict';
     this.powerButton.id='power';
+    this.redButton.groupName='soundButtons';
+    this.greenButton.groupName='soundButtons';
+    this.yellowButton.groupName='soundButtons';
+    this.blueButton.groupName='soundButtons';
     this.startButton.on('click',handleButtonClicks);
     // buttons=[
     //   {name:"start",value=this.startButton},
@@ -271,11 +250,104 @@ var Vue=function(){
     that.simonGameContainer.addChild(that.strictButtonLED);
   }
 
+  function drawSoundButton(buttonColor,buttonPosition){
+    var button=new createjs.Shape();
+    button.graphics.f(createjs.Graphics.getRGB(buttonColor));
+    button.graphics.setStrokeStyle(20);
+    var strokeCommand = button.graphics.beginStroke("#333").command;
+    button.graphics.moveTo(0,0);
+    switch(buttonPosition){
+      case "bottom right":
+        button.graphics.arc(0,0,200,0,Math.PI/2);
+        break;
+      case "bottom left":
+        button.graphics.arc(0,0,200,Math.PI/2,Math.PI);
+        break;
+      case "top left":
+        button.graphics.arc(0,0,200,Math.PI,-Math.PI/2);
+        break;
+      case "top right":
+        button.graphics.arc(0,0,200,-Math.PI/2,0);
+        break;
+      default:
+        return;
+        break;
+    }
+    button.graphics.lineTo(0,0);
+    button.x=100;
+    button.y=100;
+    return button;
+  }
 
   function addEventListeners(){
     buttons.forEach(function(button){
-      button.addEventListener('click',handleButtonClicks);
+      if(button.groupName)
+      {
+        if(button.groupName==='soundButtons')
+        {
+          button.addEventListener('mousedown',handleSoundButtonPressed);
+          button.on('pressup',handleSoundButtonReleased);
+        }
+      }
+      else{
+        button.addEventListener('click',handleButtonClicks);
+      }
     });
+  }
+
+  function handleSoundButtonPressed(e){
+    console.log('button pressed');
+    var button=e.target;
+    if(button.id==='red')
+    {
+      button=drawSoundButton(0xFF0000,"top right");
+      that.simonGameContainer.addChild(button);
+    }
+    if(button.id==='yellow')
+    {
+      button=drawSoundButton(0xFFFF00,"bottom right");
+      that.simonGameContainer.addChild(button);
+    }
+    if(button.id==='green')
+    {
+      button=drawSoundButton(0x00FF00,"bottom left");
+      that.simonGameContainer.addChild(button);
+    }
+    if(button.id==='blue')
+    {
+      button=drawSoundButton(0x0000FF,"top left");
+      that.simonGameContainer.addChild(button);
+    }
+
+    playSound(button.id);
+
+    that.simonGameContainer.addChild(that.innerCircleContainer);
+  }
+
+  function handleSoundButtonReleased(e){
+    console.log('button released');
+    var button=e.target;
+    if(button.id==='red')
+    {
+      button=drawSoundButton(0x440000,"top right");
+      that.simonGameContainer.addChild(button);
+    }
+    if(button.id==='yellow')
+    {
+      button=drawSoundButton(0x444400,"bottom right");
+      that.simonGameContainer.addChild(button);
+    }
+    if(button.id==='green')
+    {
+      button=drawSoundButton(0x004400,"bottom left");
+      that.simonGameContainer.addChild(button);
+    }
+    if(button.id==='blue')
+    {
+      button=drawSoundButton(0x000044,"top left");
+      that.simonGameContainer.addChild(button);
+    }
+    that.simonGameContainer.addChild(that.innerCircleContainer);
   }
 
   this.pressButton=function(idButton){
@@ -289,29 +361,6 @@ var Vue=function(){
 
   function handleButtonClicks(e){
     animateButton(e.target);
-    switch(e.target.id){
-      case 'red':
-        playSound('red');
-      break;
-      case 'yellow':
-        playSound('yellow');
-      break;
-      case 'blue':
-        playSound('blue');
-      break;
-      case 'green':
-        playSound('green');
-      break;
-      case 'start':
-        console.log('game started');
-      break;
-      case 'strict':
-        console.log('strict mode');
-      break;
-      case 'power':
-        console.log('power button');
-      break;
-    }
   }
 
   function animateButton(button){
@@ -352,6 +401,7 @@ var Vue=function(){
   createjs.Ticker.addEventListener("tick", this.stage);
 
   function playSound(id){
+    console.log('play sound called');
     createjs.Sound.play(id);
   }
 
