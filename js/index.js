@@ -112,7 +112,19 @@ var Vue=function(){
   var that=this;
   var buttons=[];
 
-  this.draw=function(redButtonColor=0x440000,blueButtonColor=0x000044,greenButtonColor=0x004400,yellowButtonColor=0x444400,strictButtonLEDColor=0x330000){
+  this.redButtonColorReleased=0x880000;
+  this.blueButtonColorReleased=0x000088;
+  this.greenButtonColorReleased=0x008800;
+  this.yellowButtonColorReleased=0x888800;
+  this.strictButtonLEDColorReleased=0x660000;
+
+  this.redButtonColorPressed=0xFF0000;
+  this.blueButtonColorPressed=0x0000FF;
+  this.greenButtonColorPressed=0x00FF00;
+  this.yellowButtonColorPressed=0xFFFFFF00;
+  this.strictButtonLEDColorPressed=0xFF0000;
+
+  this.draw=function(){
     var outerCircle = new createjs.Shape();
     this.simonGameContainer=new createjs.Container();
     outerCircle.graphics.f(createjs.Graphics.getRGB(0x333333));
@@ -122,13 +134,13 @@ var Vue=function(){
     outerCircle.y=100;
     outerCircle.shadow=new createjs.Shadow("#000000",0, 0, 10);
     this.simonGameContainer.addChild(outerCircle);
-    this.redButton=drawSoundButton(redButtonColor,"top right");
+    this.redButton=drawSoundButton(this.redButtonColorReleased,"top right");
     this.simonGameContainer.addChild(this.redButton);
-    this.blueButton=drawSoundButton(blueButtonColor,"top left");
+    this.blueButton=drawSoundButton(this.blueButtonColorReleased,"top left");
     this.simonGameContainer.addChild(this.blueButton);
-    this.greenButton=drawSoundButton(greenButtonColor,"bottom left");
+    this.greenButton=drawSoundButton(this.greenButtonColorReleased,"bottom left");
     this.simonGameContainer.addChild(this.greenButton);
-    this.yellowButton=drawSoundButton(yellowButtonColor,"bottom right");
+    this.yellowButton=drawSoundButton(this.yellowButtonColorReleased,"bottom right");
     this.simonGameContainer.addChild(this.yellowButton);
     this.innerCircleContainer=new createjs.Container();
     var innerCircle=new createjs.Shape();
@@ -164,7 +176,7 @@ var Vue=function(){
     startButtonText.x =85;
     startButtonText.y=125;
     this.innerCircleContainer.addChild(startButtonText);
-    this.strictButtonLED=drawStrictButtonLED(0x440000);
+    this.strictButtonLED=drawStrictButtonLED(this.strictButtonLEDColorReleased);
     this.strictButton=new createjs.Shape();
     this.strictButton.graphics.f(createjs.Graphics.getRGB(0xFFFF00));
     this.strictButton.graphics.setStrokeStyle(3);
@@ -300,22 +312,22 @@ var Vue=function(){
     var button=e.target;
     if(button.id==='red')
     {
-      button=drawSoundButton(0xFF0000,"top right");
+      button=drawSoundButton(that.redButtonColorPressed,"top right");
       that.simonGameContainer.addChild(button);
     }
     if(button.id==='yellow')
     {
-      button=drawSoundButton(0xFFFF00,"bottom right");
+      button=drawSoundButton(that.yellowButtonColorPressed,"bottom right");
       that.simonGameContainer.addChild(button);
     }
     if(button.id==='green')
     {
-      button=drawSoundButton(0x00FF00,"bottom left");
+      button=drawSoundButton(that.greenButtonColorPressed,"bottom left");
       that.simonGameContainer.addChild(button);
     }
     if(button.id==='blue')
     {
-      button=drawSoundButton(0x0000FF,"top left");
+      button=drawSoundButton(that.blueButtonColorPressed,"top left");
       that.simonGameContainer.addChild(button);
     }
 
@@ -329,22 +341,22 @@ var Vue=function(){
     var button=e.target;
     if(button.id==='red')
     {
-      button=drawSoundButton(0x440000,"top right");
+      button=drawSoundButton(that.redButtonColorReleased,"top right");
       that.simonGameContainer.addChild(button);
     }
     if(button.id==='yellow')
     {
-      button=drawSoundButton(0x444400,"bottom right");
+      button=drawSoundButton(that.yellowButtonColorReleased,"bottom right");
       that.simonGameContainer.addChild(button);
     }
     if(button.id==='green')
     {
-      button=drawSoundButton(0x004400,"bottom left");
+      button=drawSoundButton(that.greenButtonColorReleased,"bottom left");
       that.simonGameContainer.addChild(button);
     }
     if(button.id==='blue')
     {
-      button=drawSoundButton(0x000044,"top left");
+      button=drawSoundButton(that.blueButtonColorReleased,"top left");
       that.simonGameContainer.addChild(button);
     }
     that.simonGameContainer.addChild(that.innerCircleContainer);
@@ -357,7 +369,6 @@ var Vue=function(){
     animateButton(button);
     playSound(idButton);
   }
-
 
   function handleButtonClicks(e){
     animateButton(e.target);
