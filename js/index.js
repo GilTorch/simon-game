@@ -6,7 +6,7 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext);
 var speaker=audioCtx.destination;
 var volume=audioCtx.createGain();
 volume.connect(speaker);
-var Modele = function (vue) {
+var Modele = function () {
   /*
   Logic of the app:
   1)the user presses the power button
@@ -18,9 +18,6 @@ var Modele = function (vue) {
   if the user succeed then one more random button is pressed
   by the app and so on...
   */
-
-  var myVue = new Vue();
-
   var seriesOfButton = ['red', 'yellow', 'green', 'blue'];
   /*
   Steps
@@ -29,16 +26,18 @@ var Modele = function (vue) {
   3)Do step2->choose a random button->press it-> play his sound
   */
 
+  var myController;
+
   function doStep(step) {
     if (step == 0) {
       /** Choose a random button **/
       var random = Math.floor(Math.random * seriesOfButton.length);
       var buttonChosen = seriesOfButton[random];
       /** Tell the vue to press this button**/
-      myVue.pressButton(buttonChosen);
-      setTimeout(function () {
-        gameOver();
-      }, 3000);
+      myController.pressButton(buttonChosen);
+      // setTimeout(function () {
+      //   gameOver();
+      // }, 3000);
     }
     else {
       doStep(step - 1);
@@ -58,15 +57,21 @@ var Modele = function (vue) {
 
   var strictMode = false;
 
-  function onApp() {
-    gameOn = true;
+ this.setController=function(passedController){
+    myController=passedController;
+ }
+
+ this.toggleGame=function() {
+    gameOn = !gameOn;
+    console.log('Game Is ON:'+gameOn);
   }
 
-  // this.getButtonPressedByUser(button){
-  //
-  // }
+ this.toggleStrictMode=function(){
+   strictMode=!strictMode;
+   console.log('Strict Mode Is ON:'+strictMode);
+ }
 
-  function startGame() {
+this.startGame=function() {
     if (gameOn) {
       gameStarted = true;
       step = 1
@@ -82,13 +87,21 @@ var Modele = function (vue) {
   }
 }
 
-var Controller = function (vue) {
-
-  var myVue = vue;
-  var vueButtons = vue.buttons;
-
-
-
+var Controller = function (){
+  var myVue = new Vue();
+  var myModel=new Modele();
+  myModele.setController(this);
+  myVue.init();
+  var buttons=myVue.buttons;
+  var startButton=buttons[0];
+  var strictButton=buttons[1];
+  var powerButton=buttons[2];
+  powerButton.addEventListener('click',myModel.toggleGame);
+  strictButton.addEventListener('click',myModel.toggleStrictMode)
+  startButton.addEventListener('click',myModel.startGame);
+  this.pressButton=function(id){
+    console.log("Button Pressed:");
+  }
 }
 
 var Vue = function () {
@@ -111,7 +124,7 @@ var Vue = function () {
   //inner Circle Container
   this.innerCircleContainer;
   var that = this;
-  var buttons = [];
+  this.buttons = [];
 
   this.redButtonColorReleased = 0x880000;
   this.blueButtonColorReleased = 0x000088;
@@ -244,7 +257,7 @@ var Vue = function () {
     this.greenButton.groupName = 'soundButtons';
     this.yellowButton.groupName = 'soundButtons';
     this.blueButton.groupName = 'soundButtons';
-    buttons = [this.startButton, this.strictButton, this.powerButton, this.redButton, this.yellowButton, this.greenButton, this.blueButton];
+    that.buttons = [this.startButton, this.strictButton, this.powerButton, this.redButton, this.yellowButton, this.greenButton, this.blueButton];
     addEventListeners();
   }
 
@@ -289,7 +302,7 @@ var Vue = function () {
   }
 
   function addEventListeners() {
-    buttons.forEach(function (button) {
+    that.buttons.forEach(function (button) {
       if (button.groupName) {
         if (button.groupName === 'soundButtons') {
           button.addEventListener('mousedown', handleSoundButtonPressed);
@@ -452,8 +465,7 @@ function createSound(color){
 
 
 function launchApp() {
-  var vue = new Vue();
-  vue.init();
+  var controller=new Controller();
 }
 
 launchApp();
