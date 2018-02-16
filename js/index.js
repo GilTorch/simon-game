@@ -23,28 +23,26 @@ var Modele = function () {
   Steps
   1)choose a random button->press-it->play his sound
   2)Do Step1->choose a random button->press it-> play his sound
+  wait for the user to hit the right button:
+  if he waits too long game over
+  if he press the wrong button game over
+  if he press the right combination of buttons before time is up
   3)Do step2->choose a random button->press it-> play his sound
   */
 
   var myController;
-
-  function doStep(step) {
-    if (step == 0) {
-      /** Choose a random button **/
-      var random = Math.floor(Math.random * seriesOfButton.length);
-      var buttonChosen = seriesOfButton[random];
-      /** Tell the vue to press this button**/
-      myController.pressButton(buttonChosen);
-      // setTimeout(function () {
-      //   gameOver();
-      // }, 3000);
-    }
-    else {
-      doStep(step - 1);
-      doStep(step);
-    }
+  var buttonsChosen=[];
+  function chooseAndPlay() {
+    var seriesOfButton=["yellow","red","green","blue"];
+    var random = Math.floor(Math.random() * seriesOfButton.length);
+    var buttonChosen = seriesOfButton[random];
+    buttonsChosen.push(buttonChosen);
+    myController.pressAndReleaseButton(buttonsChosen);
+    myController.showStepNumber(buttonsChosen.length);
   }
 
+  
+  
   function gameOver() {
     gameOn = false;
     gameStarted = false;
@@ -63,8 +61,19 @@ var Modele = function () {
 
  this.toggleGame=function() {
     gameOn = !gameOn;
-    console.log('Game Is ON:'+gameOn);
+    if(gameOn){
+      myController.onGame();
+    }
+    else{
+      myController.offGame();
+      gameOver();
+    }
   }
+
+ function gameOver(){
+   buttonsChosen=[];
+   gameStarted=false;
+ }
 
  this.toggleStrictMode=function(){
    strictMode=!strictMode;
@@ -73,34 +82,54 @@ var Modele = function () {
 
 this.startGame=function() {
     if (gameOn) {
-      gameStarted = true;
-      step = 1
-      doStep(step);
-      step++;//If the user clicks the right button then this part gets done
-      if (strictMode) {
-
-      }
-      else {
-
+      if(!gameStarted){
+        gameStarted = true;
+        chooseAndPlay();  
       }
     }
   }
 }
 
-var Controller = function (){
+var Controller=function (){
+  var that=this;
   var myVue = new Vue();
   var myModel=new Modele();
-  myModele.setController(this);
+  myModel.setController(this);
   myVue.init();
+
   var buttons=myVue.buttons;
   var startButton=buttons[0];
   var strictButton=buttons[1];
   var powerButton=buttons[2];
+
   powerButton.addEventListener('click',myModel.toggleGame);
-  strictButton.addEventListener('click',myModel.toggleStrictMode)
-  startButton.addEventListener('click',myModel.startGame);
-  this.pressButton=function(id){
-    console.log("Button Pressed:");
+  
+  this.offGame=function(){
+    myVue.offGame();
+    that.showStepNumber("--");
+  }
+
+  this.onGame=function(){
+    myVue.addEventListeners();
+    strictButton.addEventListener('click',myModel.toggleStrictMode)
+    startButton.addEventListener('click',myModel.startGame);
+  }
+
+  this.showStepNumber=function(step){
+    if(step<10)step="0"+step.toString();
+    else{
+      step=step.toString();
+    }
+    myVue.screenText.text=step;
+  }
+
+  this.pressAndReleaseButton=function(buttonsId){
+    buttonsId.forEach(function(buttonId){
+      myVue.animateButtonPressedReleased("red","pressed");
+      setTimeout(function(){
+        myVue.animateButtonPressedReleased("red","release");
+      },1000);
+    });
   }
 }
 
@@ -235,9 +264,9 @@ var Vue = function () {
     gameName.x = 29;
     gameName.y = 30;
     this.innerCircleContainer.addChild(gameName);
-    this.screenText = new createjs.Text("--", "25px 'Orbitron'", "#F00");
-    this.screenText.x = 33;
-    this.screenText.y = 90;
+    this.screenText = new createjs.Text("--", "20px 'Orbitron'", "#F00");
+    this.screenText.x = 30;
+    this.screenText.y = 93;
     this.innerCircleContainer.addChild(this.screenText);
     this.innerCircleContainer.x = 0;
     this.innerCircleContainer.y = 0;
@@ -253,12 +282,12 @@ var Vue = function () {
     this.startButton.id = 'start';
     this.strictButton.id = 'strict';
     this.powerButton.id = 'power';
+    this.powerButton.addEventListener('click',handleButtonClicks);
     this.redButton.groupName = 'soundButtons';
     this.greenButton.groupName = 'soundButtons';
     this.yellowButton.groupName = 'soundButtons';
     this.blueButton.groupName = 'soundButtons';
     that.buttons = [this.startButton, this.strictButton, this.powerButton, this.redButton, this.yellowButton, this.greenButton, this.blueButton];
-    addEventListeners();
   }
 
   function drawStrictButtonLED(strictButtonLEDColor) {
@@ -301,7 +330,7 @@ var Vue = function () {
     return button;
   }
 
-  function addEventListeners() {
+  this.addEventListeners=function() {
     that.buttons.forEach(function (button) {
       if (button.groupName) {
         if (button.groupName === 'soundButtons') {
@@ -310,52 +339,64 @@ var Vue = function () {
         }
       }
       else {
-        button.addEventListener('click', handleButtonClicks);
+        if(button.id==='start' || button.id==='strict'){
+          button.addEventListener('click', handleButtonClicks);
+        }
       }
     });
+  }
+
+  this.offGame=function(){
+    that.buttons.forEach(function (button) {
+      if (button.groupName) {
+        if (button.groupName === 'soundButtons') {
+          button.removeAllEventListeners();
+        }
+      }
+      if(button.id=='start' || button.id=='strict'){
+        button.removeAllEventListeners();
+      }
+    });
+    that.strictButtonLED = drawStrictButtonLED(that.strictButtonLEDColorOff);
+    strictButtonLEDCurrentColor=that.strictButtonLEDColorOff;
+  }
+
+  this.animateButtonPressedReleased=function(buttonId,buttonState){
+    var position="";
+    var color=(buttonState==="pressed")?that[buttonId+"ButtonColorPressed"]:that[buttonId+"ButtonColorReleased"];
+      if (buttonId === 'red') {
+        position="top right";
+      }
+      if (buttonId === 'yellow') {
+        position="bottom right";
+      }
+      if (buttonId=== 'green') {
+        position="bottom left";
+      }
+      if (buttonId === 'blue') {
+        position="top left";
+      }
+    button = drawSoundButton(color,position);
+    if(buttonState==="pressed"){
+      playSound(buttonId);
+    }else{
+      stopSound(buttonId);
+    }
+    that.simonGameContainer.addChild(button);
+    that.simonGameContainer.addChild(that.innerCircleContainer);
+    this.strictButtonLED = drawStrictButtonLED(strictButtonLEDCurrentColor);
   }
 
   function handleSoundButtonPressed(e) {
     console.log('button pressed');
     var button = e.target;
-    if (button.id === 'red') {
-      button = drawSoundButton(that.redButtonColorPressed, "top right");
-    }
-    if (button.id === 'yellow') {
-      button = drawSoundButton(that.yellowButtonColorPressed, "bottom right");
-    }
-    if (button.id === 'green') {
-      button = drawSoundButton(that.greenButtonColorPressed, "bottom left");
-    }
-    if (button.id === 'blue') {
-      button = drawSoundButton(that.blueButtonColorPressed, "top left");
-    }
-    playSound(e.target.id);
-    that.simonGameContainer.addChild(button);
-    that.simonGameContainer.addChild(that.innerCircleContainer);
-    this.strictButtonLED = drawStrictButtonLED(strictButtonLEDCurrentColor);
+    that.animateButtonPressedReleased(button.id,"pressed");
   }
 
   function handleSoundButtonReleased(e) {
     console.log('button released');
     var button = e.target;
-    if (button.id === 'red') {
-      button = drawSoundButton(that.redButtonColorReleased, "top right");
-    }
-    if (button.id === 'yellow') {
-      button = drawSoundButton(that.yellowButtonColorReleased, "bottom right");
-    }
-    if (button.id === 'green') {
-      button = drawSoundButton(that.greenButtonColorReleased, "bottom left");
-    }
-    if (button.id === 'blue') {
-      button = drawSoundButton(that.blueButtonColorReleased, "top left");
-
-    }
-    stopSound(e.target.id);
-    that.simonGameContainer.addChild(button);
-    that.simonGameContainer.addChild(that.innerCircleContainer);
-    this.strictButtonLED = drawStrictButtonLED(strictButtonLEDCurrentColor);
+    that.animateButtonPressedReleased(button.id,"released");
   }
 
   this.pressButton = function (idButton) {
